@@ -265,21 +265,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_access_expense: {
-        Args: { _expense_id: string; _user_id: string }
-        Returns: boolean
-      }
       create_kostenstall: {
         Args: { _emails: string[]; _name: string; _photo_url: string }
         Returns: string
-      }
-      is_expense_creditor: {
-        Args: { _expense_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_group_member: {
-        Args: { _group_id: string; _user_id: string }
-        Returns: boolean
       }
       join_kostenstall: {
         Args: { _group_name: string; _inviter_email: string }

@@ -11,7 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthenticatedBeitretenRouteImport } from './routes/_authenticated/beitreten'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedNeuRouteImport } from './routes/_authenticated/neu'
+import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,32 +25,63 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedBeitretenRoute = AuthenticatedBeitretenRouteImport.update({
+  id: '/beitreten',
+  path: '/beitreten',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNeuRoute = AuthenticatedNeuRouteImport.update({
+  id: '/neu',
+  path: '/neu',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/beitreten': typeof AuthenticatedBeitretenRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/neu': typeof AuthenticatedNeuRoute
+  '/profil': typeof AuthenticatedProfilRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/beitreten': typeof AuthenticatedBeitretenRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/neu': typeof AuthenticatedNeuRoute
+  '/profil': typeof AuthenticatedProfilRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_authenticated/beitreten': typeof AuthenticatedBeitretenRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/neu': typeof AuthenticatedNeuRoute
+  '/_authenticated/profil': typeof AuthenticatedProfilRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard'
+  fullPaths: '/' | '/beitreten' | '/dashboard' | '/neu' | '/profil'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard'
-  id: '__root__' | '/' | '/_authenticated' | '/_authenticated/dashboard'
+  to: '/' | '/beitreten' | '/dashboard' | '/neu' | '/profil'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/_authenticated/beitreten'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/neu'
+    | '/_authenticated/profil'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -71,6 +105,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/beitreten': {
+      id: '/_authenticated/beitreten'
+      path: '/beitreten'
+      fullPath: '/beitreten'
+      preLoaderRoute: typeof AuthenticatedBeitretenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -78,15 +119,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/neu': {
+      id: '/_authenticated/neu'
+      path: '/neu'
+      fullPath: '/neu'
+      preLoaderRoute: typeof AuthenticatedNeuRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profil': {
+      id: '/_authenticated/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof AuthenticatedProfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBeitretenRoute: typeof AuthenticatedBeitretenRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedNeuRoute: typeof AuthenticatedNeuRoute
+  AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBeitretenRoute: AuthenticatedBeitretenRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedNeuRoute: AuthenticatedNeuRoute,
+  AuthenticatedProfilRoute: AuthenticatedProfilRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

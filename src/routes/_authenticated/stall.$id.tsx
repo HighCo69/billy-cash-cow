@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { computeNet, num, useMe, useStall, type Member } from "@/lib/data";
+import { computeNet, num, useMe, useStall, type Member, type Split } from "@/lib/data";
 import { deDate, eur, paypalLink, simplifyDebts } from "@/lib/billy";
 import { ExpenseForm } from "@/components/billy/ExpenseForm";
 import { ConfirmButton } from "@/components/billy/ConfirmButton";
@@ -47,7 +47,7 @@ function StallPage() {
   const transfers = useMemo(() => simplifyDebts(net), [net]);
 
   const splitsByExpense = useMemo(() => {
-    const map = new Map<string, typeof data.splits>();
+    const map = new Map<string, Split[]>();
     for (const split of data?.splits ?? []) {
       if (!split.expense_id) continue;
       const list = map.get(split.expense_id) ?? [];
@@ -62,14 +62,14 @@ function StallPage() {
 
   async function setSplitStatus(splitId: string, status: "accepted" | "disputed") {
     const { error } = await supabase.from("expense_splits").update({ status }).eq("id", splitId);
-    if (error) return toast.error("Das ging nicht.");
+    if (error) { toast.error("Das ging nicht."); return; }
     toast.success(status === "accepted" ? "Übernommen ins Konto." : "Ab in den Ordner „Unklar“.");
     refresh();
   }
 
   async function withdrawSplit(splitId: string) {
     const { error } = await supabase.from("expense_splits").delete().eq("id", splitId);
-    if (error) return toast.error("Zurücknehmen ging nicht.");
+    if (error) { toast.error("Zurücknehmen ging nicht."); return; }
     toast.success("Forderung zurückgenommen.");
     refresh();
   }
@@ -87,14 +87,14 @@ function StallPage() {
       payment_method: method,
       status: "pending",
     });
-    if (error) return toast.error("Tilgung konnte nicht gespeichert werden.");
+    if (error) { toast.error("Tilgung konnte nicht gespeichert werden."); return; }
     toast.success("Tilgung eingetragen – warte auf Bestätigung.");
     refresh();
   }
 
   async function setSettlementStatus(settlementId: string, status: "confirmed" | "disputed") {
     const { error } = await supabase.from("settlements").update({ status }).eq("id", settlementId);
-    if (error) return toast.error("Das ging nicht.");
+    if (error) { toast.error("Das ging nicht."); return; }
     toast.success(status === "confirmed" ? "Tilgung bestätigt." : "Tilgung bestritten.");
     refresh();
   }

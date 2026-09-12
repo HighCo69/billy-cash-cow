@@ -44,7 +44,7 @@ function NewStall() {
       if (cleaned.length > 11) throw new Error("Maximal 12 Personen pro Kostenstall (inkl. dir).");
       const { data, error } = await supabase.rpc("create_kostenstall", {
         _name: name.trim(),
-        _photo_url: photo,
+        _photo_url: photo ?? "",
         _emails: cleaned,
       });
       if (error) throw error;

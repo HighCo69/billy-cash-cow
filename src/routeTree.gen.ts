@@ -15,6 +15,7 @@ import { Route as AuthenticatedBeitretenRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedNeuRouteImport } from './routes/_authenticated/neu'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedStallIdRouteImport } from './routes/_authenticated/stall.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -45,6 +46,11 @@ const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedStallIdRoute = AuthenticatedStallIdRouteImport.update({
+  id: '/stall/$id',
+  path: '/stall/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/neu': typeof AuthenticatedNeuRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/stall/$id': typeof AuthenticatedStallIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/neu': typeof AuthenticatedNeuRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/stall/$id': typeof AuthenticatedStallIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,12 +76,14 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/neu': typeof AuthenticatedNeuRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
+  '/_authenticated/stall/$id': typeof AuthenticatedStallIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/beitreten' | '/dashboard' | '/neu' | '/profil'
+  fullPaths:
+    '/' | '/beitreten' | '/dashboard' | '/neu' | '/profil' | '/stall/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/beitreten' | '/dashboard' | '/neu' | '/profil'
+  to: '/' | '/beitreten' | '/dashboard' | '/neu' | '/profil' | '/stall/$id'
   id:
     | '__root__'
     | '/'
@@ -82,6 +92,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/neu'
     | '/_authenticated/profil'
+    | '/_authenticated/stall/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -133,6 +144,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/stall/$id': {
+      id: '/_authenticated/stall/$id'
+      path: '/stall/$id'
+      fullPath: '/stall/$id'
+      preLoaderRoute: typeof AuthenticatedStallIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -141,6 +159,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedNeuRoute: typeof AuthenticatedNeuRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+  AuthenticatedStallIdRoute: typeof AuthenticatedStallIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -148,6 +167,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedNeuRoute: AuthenticatedNeuRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+  AuthenticatedStallIdRoute: AuthenticatedStallIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

@@ -30,6 +30,9 @@ function StallPage() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("konto");
   const [showForm, setShowForm] = useState(false);
+  const [newName, setNewName] = useState<string | null>(null);
+  const [savingName, setSavingName] = useState(false);
+
 
   const meId = me?.userId ?? "";
   const members = data?.members ?? [];

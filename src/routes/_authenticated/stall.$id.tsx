@@ -417,8 +417,30 @@ function StallPage() {
 
       {tab === "team" && (
         <section className="mt-4 space-y-3">
+          <form className="card-stall p-4" onSubmit={renameStall}>
+            <h2 className="font-display text-lg">Stall umbenennen</h2>
+            <div className="mt-3 flex gap-2">
+              <input
+                value={newName ?? data.group.name}
+                onChange={(event) => setNewName(event.target.value)}
+                className="flex-1 rounded-xl border-2 border-ink bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-ring"
+              />
+              <button
+                type="submit"
+                disabled={savingName}
+                className="rounded-full border-2 border-ink bg-primary px-4 py-2 font-bold text-primary-foreground disabled:opacity-60"
+              >
+                Speichern
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Achtung: Neue Leute brauchen zum Beitreten genau diesen Namen.
+            </p>
+          </form>
+
           <div className="card-stall p-4">
             <h2 className="font-display text-lg">Im Stall ({members.length}/12)</h2>
+
             <ul className="mt-3 space-y-2">
               {members.map((member: Member) => (
                 <li key={member.id} className="flex items-center justify-between gap-2 text-sm">

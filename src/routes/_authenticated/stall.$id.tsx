@@ -43,6 +43,23 @@ function StallPage() {
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["stall", id] });
 
+  async function renameStall(event: React.FormEvent) {
+    event.preventDefault();
+    const value = (newName ?? "").trim();
+    if (!value) return;
+    setSavingName(true);
+    const { error } = await supabase.from("groups").update({ name: value }).eq("id", id);
+    setSavingName(false);
+    if (error) {
+      toast.error("Umbenennen hat nicht geklappt.");
+      return;
+    }
+    await Promise.all([refresh(), queryClient.invalidateQueries({ queryKey: ["stalls"] })]);
+    setNewName(null);
+    toast.success("Neuer Name hängt am Stall!");
+  }
+
+
   const net = useMemo(
     () => computeNet(members, data?.expenses ?? [], data?.splits ?? [], data?.settlements ?? []),
     [members, data?.expenses, data?.splits, data?.settlements],

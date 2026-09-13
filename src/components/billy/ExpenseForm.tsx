@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES, splitAmount } from "@/lib/billy";
+import { playCoinSound } from "@/lib/sounds";
 import type { Member } from "@/lib/data";
 
 type Item = { amount: string; category: string; details: string };
@@ -123,6 +124,10 @@ export function ExpenseForm({
               inputMode="decimal"
               value={item.amount}
               onChange={(event) => update(index, { amount: event.target.value })}
+              onBlur={(event) => {
+                const value = Number(event.target.value.replace(",", "."));
+                if (Number.isFinite(value) && value > 0) playCoinSound();
+              }}
               placeholder="0,00"
               className="w-full rounded-xl border-2 border-ink bg-background px-3 py-2 text-lg font-bold outline-none focus:ring-2 focus:ring-ring"
             />

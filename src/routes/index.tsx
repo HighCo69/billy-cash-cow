@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import billyLogo from "@/assets/billy-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -107,9 +108,11 @@ function LandingPage() {
       <div className="hay-stripes h-3 w-full" />
       <main className="mx-auto w-full max-w-md px-4 pb-16 pt-8">
         <section className="text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border-2 border-ink bg-primary text-4xl">
-            🐄
-          </div>
+          <img
+            src={billyLogo.url}
+            alt="BILLY – The Friendly Cash Cow"
+            className="mx-auto h-24 w-24 rounded-full border-2 border-ink bg-white object-contain"
+          />
           <h1 className="mt-4 font-display text-3xl font-bold text-foreground">
             BILLY
             <span className="mt-1 block text-base font-semibold text-muted-foreground">

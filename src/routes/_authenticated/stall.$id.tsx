@@ -30,6 +30,9 @@ function StallPage() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("konto");
   const [showForm, setShowForm] = useState(false);
+  const [newName, setNewName] = useState<string | null>(null);
+  const [savingName, setSavingName] = useState(false);
+
 
   const meId = me?.userId ?? "";
   const members = data?.members ?? [];
@@ -39,6 +42,23 @@ function StallPage() {
     members.find((m) => m.user_id === userId)?.profile ?? null;
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["stall", id] });
+
+  async function renameStall(event: React.FormEvent) {
+    event.preventDefault();
+    const value = (newName ?? "").trim();
+    if (!value) return;
+    setSavingName(true);
+    const { error } = await supabase.from("groups").update({ name: value }).eq("id", id);
+    setSavingName(false);
+    if (error) {
+      toast.error("Umbenennen hat nicht geklappt.");
+      return;
+    }
+    await Promise.all([refresh(), queryClient.invalidateQueries({ queryKey: ["stalls"] })]);
+    setNewName(null);
+    toast.success("Neuer Name hängt am Stall!");
+  }
+
 
   const net = useMemo(
     () => computeNet(members, data?.expenses ?? [], data?.splits ?? [], data?.settlements ?? []),
@@ -397,8 +417,30 @@ function StallPage() {
 
       {tab === "team" && (
         <section className="mt-4 space-y-3">
+          <form className="card-stall p-4" onSubmit={renameStall}>
+            <h2 className="font-display text-lg">Stall umbenennen</h2>
+            <div className="mt-3 flex gap-2">
+              <input
+                value={newName ?? data.group.name}
+                onChange={(event) => setNewName(event.target.value)}
+                className="flex-1 rounded-xl border-2 border-ink bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-ring"
+              />
+              <button
+                type="submit"
+                disabled={savingName}
+                className="rounded-full border-2 border-ink bg-primary px-4 py-2 font-bold text-primary-foreground disabled:opacity-60"
+              >
+                Speichern
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Achtung: Neue Leute brauchen zum Beitreten genau diesen Namen.
+            </p>
+          </form>
+
           <div className="card-stall p-4">
             <h2 className="font-display text-lg">Im Stall ({members.length}/12)</h2>
+
             <ul className="mt-3 space-y-2">
               {members.map((member: Member) => (
                 <li key={member.id} className="flex items-center justify-between gap-2 text-sm">

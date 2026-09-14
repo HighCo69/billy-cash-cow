@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import billyLogo from "@/assets/billy-logo.png.asset.json";
+import billyLogo from "@/assets/billy-logo-kreis.webp.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({

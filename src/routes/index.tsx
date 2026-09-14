@@ -87,6 +87,23 @@ function LandingPage() {
     }
   }
 
+  async function handleForgotPassword() {
+    if (!email.trim()) {
+      toast.error("Trag erst deine E-Mail ein, dann schicken wir dir den Link.");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error("Das hat nicht geklappt. Versuch es gleich nochmal.");
+      return;
+    }
+    toast.success("Wenn es ein Konto mit dieser E-Mail gibt, ist der Link unterwegs in dein Postfach.");
+  }
+
   async function handleGoogle() {
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
@@ -210,6 +227,15 @@ function LandingPage() {
             >
               {mode === "login" ? "Hinein in den Stall" : "Stalltür aufmachen"}
             </button>
+            {mode === "login" && (
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="w-full text-center text-sm font-bold text-muted-foreground underline underline-offset-2"
+              >
+                Passwort vergessen?
+              </button>
+            )}
           </form>
 
           <div className="my-4 flex items-center gap-3 text-xs font-bold uppercase text-muted-foreground">

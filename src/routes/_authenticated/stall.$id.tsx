@@ -48,10 +48,14 @@ function StallPage() {
     const value = (newName ?? "").trim();
     if (!value) return;
     setSavingName(true);
-    const { error } = await supabase.from("groups").update({ name: value }).eq("id", id);
+    const { data: updated, error } = await supabase
+      .from("groups")
+      .update({ name: value })
+      .eq("id", id)
+      .select("id");
     setSavingName(false);
-    if (error) {
-      toast.error("Umbenennen hat nicht geklappt.");
+    if (error || !updated?.length) {
+      toast.error(error ? `Umbenennen hat nicht geklappt: ${error.message}` : "Keine Berechtigung zum Umbenennen.");
       return;
     }
     await Promise.all([refresh(), queryClient.invalidateQueries({ queryKey: ["stalls"] })]);

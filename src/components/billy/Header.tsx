@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { LogOut, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import billyLogo from "@/assets/billy-logo.png.asset.json";
+import billyLogo from "@/assets/billy-logo-kreis.webp.asset.json";
 
 export function Header() {
   const navigate = useNavigate();

@@ -118,7 +118,7 @@ export function useStall(groupId: string) {
         supabase.from("groups").select("id, name, photo_url, created_by, created_at").eq("id", groupId).maybeSingle(),
         supabase
           .from("group_members")
-          .select("id, user_id, role, profiles:user_id(id, full_name, email, phone_number, paypal_me_handle, wero_id)")
+          .select("id, user_id, role, status, profiles:user_id(id, full_name, email, phone_number, paypal_me_handle, wero_id)")
           .eq("group_id", groupId),
         supabase
           .from("expenses")

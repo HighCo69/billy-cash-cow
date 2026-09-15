@@ -10,7 +10,15 @@ export type Profile = {
   wero_id: string | null;
 };
 
-export type Member = { id: string; user_id: string; role: string; profile: Profile };
+export type MemberStatus = "pending" | "active" | "leaving";
+
+export type Member = {
+  id: string;
+  user_id: string;
+  role: string;
+  status: MemberStatus;
+  profile: Profile;
+};
 
 export type Expense = {
   id: string;
@@ -67,24 +75,37 @@ export function useMyStalls() {
     queryFn: async () => {
       const { data: memberships, error } = await supabase
         .from("group_members")
-        .select("group_id, groups(id, name, photo_url, created_at, created_by)")
+        .select("group_id, status, groups(id, name, photo_url, created_at, created_by)")
         .order("joined_at", { ascending: false });
       if (error) throw error;
-      const groups = (memberships ?? [])
-        .map((m) => m.groups)
-        .filter(Boolean) as { id: string; name: string; photo_url: string | null; created_at: string | null; created_by: string | null }[];
+      const rows = (memberships ?? []).filter((m) => m.groups) as {
+        group_id: string;
+        status: string;
+        groups: { id: string; name: string; photo_url: string | null; created_at: string | null; created_by: string | null };
+      }[];
+      const seen = new Set<string>();
+      const groups = rows.filter((r) => {
+        if (seen.has(r.groups.id)) return false;
+        seen.add(r.groups.id);
+        return true;
+      });
 
       const counts: Record<string, number> = {};
       if (groups.length) {
         const { data: all } = await supabase
           .from("group_members")
-          .select("group_id")
-          .in("group_id", groups.map((g) => g.id));
+          .select("group_id, status")
+          .in("group_id", groups.map((g) => g.groups.id));
         for (const row of all ?? []) {
-          if (row.group_id) counts[row.group_id] = (counts[row.group_id] ?? 0) + 1;
+          if (row.group_id && row.status !== "pending")
+            counts[row.group_id] = (counts[row.group_id] ?? 0) + 1;
         }
       }
-      return groups.map((g) => ({ ...g, memberCount: counts[g.id] ?? 1 }));
+      return groups.map((r) => ({
+        ...r.groups,
+        myStatus: r.status as MemberStatus,
+        memberCount: counts[r.groups.id] ?? 1,
+      }));
     },
   });
 }
@@ -97,7 +118,7 @@ export function useStall(groupId: string) {
         supabase.from("groups").select("id, name, photo_url, created_by, created_at").eq("id", groupId).maybeSingle(),
         supabase
           .from("group_members")
-          .select("id, user_id, role, profiles:user_id(id, full_name, email, phone_number, paypal_me_handle, wero_id)")
+          .select("id, user_id, role, status, profiles:user_id(id, full_name, email, phone_number, paypal_me_handle, wero_id)")
           .eq("group_id", groupId),
         supabase
           .from("expenses")
@@ -127,6 +148,7 @@ export function useStall(groupId: string) {
         id: m.id,
         user_id: m.user_id as string,
         role: m.role,
+        status: (m.status ?? "active") as MemberStatus,
         profile: m.profiles as unknown as Profile,
       }));
 

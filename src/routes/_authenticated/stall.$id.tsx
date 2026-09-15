@@ -35,13 +35,91 @@ function StallPage() {
 
 
   const meId = me?.userId ?? "";
-  const members = data?.members ?? [];
+  const allMembers = data?.members ?? [];
+  const members = allMembers.filter((m) => m.status !== "pending");
+  const pendingMembers = allMembers.filter((m) => m.status === "pending");
+  const leavingMembers = allMembers.filter((m) => m.status === "leaving");
+  const isOwner = data?.group?.created_by === meId;
+  const myMembership = allMembers.find((m) => m.user_id === meId);
   const nameOf = (userId: string | null) =>
-    members.find((m) => m.user_id === userId)?.profile?.full_name ?? "Unbekannt";
+    allMembers.find((m) => m.user_id === userId)?.profile?.full_name ?? "Unbekannt";
   const profileOf = (userId: string | null) =>
-    members.find((m) => m.user_id === userId)?.profile ?? null;
+    allMembers.find((m) => m.user_id === userId)?.profile ?? null;
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["stall", id] });
+  const refresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["stall", id] }),
+      queryClient.invalidateQueries({ queryKey: ["stalls"] }),
+    ]);
+
+  async function approveMember(memberId: string) {
+    const { error } = await supabase
+      .from("group_members")
+      .update({ status: "active" })
+      .eq("id", memberId);
+    if (error) {
+      toast.error("Freigeben ging nicht.");
+      return;
+    }
+    toast.success("Willkommen in der Herde!");
+    refresh();
+  }
+
+  async function removeMember(memberId: string, label: string) {
+    if (!window.confirm(`${label} wirklich aus dem Stall lassen?`)) return;
+    const { error } = await supabase.from("group_members").delete().eq("id", memberId);
+    if (error) {
+      toast.error("Das ging nicht.");
+      return;
+    }
+    toast.success("Tor auf, Tor zu.");
+    refresh();
+  }
+
+  async function markLeaving() {
+    if (!myMembership) return;
+    const { error } = await supabase
+      .from("group_members")
+      .update({ status: "leaving" })
+      .eq("id", myMembership.id);
+    if (error) {
+      toast.error("Das ging nicht.");
+      return;
+    }
+    toast.success("Der Stallmeister ist informiert. Er holt nur noch kurz den Schlüssel.");
+    refresh();
+  }
+
+  function requestLeave() {
+    const balance = net[meId] ?? 0;
+    if (balance < -0.005) {
+      window.alert(
+        `Damit die anderen dich nicht schlachten, solltest du erst dein Konto ausgleichen.\n\nDu schuldest noch ${eur(-balance)}.`,
+      );
+      return;
+    }
+    if (balance > 0.005) {
+      const ok = window.confirm(
+        `Warte. Du bekommst noch Futter.\n\nDie Herde muss dir noch ${eur(balance)} zahlen.\n\nWillst du darauf verzichten?`,
+      );
+      if (!ok) return;
+    }
+    markLeaving();
+  }
+
+  async function deleteStall() {
+    const open = Object.values(net).some((value) => Math.abs(value) > 0.005);
+    if (open && !window.confirm("Es sind noch Salden offen. Trotzdem alles löschen?")) return;
+    if (!window.confirm("Kostenstall mit allen Ausgaben endgültig löschen?")) return;
+    const { error } = await supabase.from("groups").delete().eq("id", id);
+    if (error) {
+      toast.error("Löschen ging nicht.");
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: ["stalls"] });
+    toast.success("Stall abgerissen.");
+    navigate({ to: "/dashboard" });
+  }
 
   async function renameStall(event: React.FormEvent) {
     event.preventDefault();

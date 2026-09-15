@@ -10,7 +10,15 @@ export type Profile = {
   wero_id: string | null;
 };
 
-export type Member = { id: string; user_id: string; role: string; profile: Profile };
+export type MemberStatus = "pending" | "active" | "leaving";
+
+export type Member = {
+  id: string;
+  user_id: string;
+  role: string;
+  status: MemberStatus;
+  profile: Profile;
+};
 
 export type Expense = {
   id: string;

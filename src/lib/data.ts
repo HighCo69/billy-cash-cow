@@ -148,6 +148,7 @@ export function useStall(groupId: string) {
         id: m.id,
         user_id: m.user_id as string,
         role: m.role,
+        status: (m.status ?? "active") as MemberStatus,
         profile: m.profiles as unknown as Profile,
       }));
 

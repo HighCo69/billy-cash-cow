@@ -75,24 +75,37 @@ export function useMyStalls() {
     queryFn: async () => {
       const { data: memberships, error } = await supabase
         .from("group_members")
-        .select("group_id, groups(id, name, photo_url, created_at, created_by)")
+        .select("group_id, status, groups(id, name, photo_url, created_at, created_by)")
         .order("joined_at", { ascending: false });
       if (error) throw error;
-      const groups = (memberships ?? [])
-        .map((m) => m.groups)
-        .filter(Boolean) as { id: string; name: string; photo_url: string | null; created_at: string | null; created_by: string | null }[];
+      const rows = (memberships ?? []).filter((m) => m.groups) as {
+        group_id: string;
+        status: string;
+        groups: { id: string; name: string; photo_url: string | null; created_at: string | null; created_by: string | null };
+      }[];
+      const seen = new Set<string>();
+      const groups = rows.filter((r) => {
+        if (seen.has(r.groups.id)) return false;
+        seen.add(r.groups.id);
+        return true;
+      });
 
       const counts: Record<string, number> = {};
       if (groups.length) {
         const { data: all } = await supabase
           .from("group_members")
-          .select("group_id")
-          .in("group_id", groups.map((g) => g.id));
+          .select("group_id, status")
+          .in("group_id", groups.map((g) => g.groups.id));
         for (const row of all ?? []) {
-          if (row.group_id) counts[row.group_id] = (counts[row.group_id] ?? 0) + 1;
+          if (row.group_id && row.status !== "pending")
+            counts[row.group_id] = (counts[row.group_id] ?? 0) + 1;
         }
       }
-      return groups.map((g) => ({ ...g, memberCount: counts[g.id] ?? 1 }));
+      return groups.map((r) => ({
+        ...r.groups,
+        myStatus: r.status as MemberStatus,
+        memberCount: counts[r.groups.id] ?? 1,
+      }));
     },
   });
 }

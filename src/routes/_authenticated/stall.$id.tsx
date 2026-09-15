@@ -35,7 +35,12 @@ function StallPage() {
 
 
   const meId = me?.userId ?? "";
-  const members = data?.members ?? [];
+  const allMembers = data?.members ?? [];
+  const members = allMembers.filter((m) => m.status !== "pending");
+  const pendingMembers = allMembers.filter((m) => m.status === "pending");
+  const leavingMembers = allMembers.filter((m) => m.status === "leaving");
+  const isOwner = data?.group?.created_by === meId;
+  const myMembership = allMembers.find((m) => m.user_id === meId);
   const nameOf = (userId: string | null) =>
     members.find((m) => m.user_id === userId)?.profile?.full_name ?? "Unbekannt";
   const profileOf = (userId: string | null) =>

@@ -204,6 +204,19 @@ function StallPage() {
 
   if (isLoading) return <p className="text-sm text-muted-foreground">BILLY käut wieder…</p>;
   if (!data?.group) return <p className="text-sm text-muted-foreground">Kostenstall nicht gefunden.</p>;
+  if (myMembership?.status === "pending")
+    return (
+      <div className="card-stall p-6 text-center">
+        <p className="text-4xl">🚪</p>
+        <p className="mt-2 font-display text-lg">Du stehst vor dem Stall „{data.group.name}“</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Der Stallmeister muss dich erst zur Herde lassen.
+        </p>
+        <Link to="/dashboard" className="mt-4 inline-block text-sm font-bold">
+          ← Deine Kontoställe
+        </Link>
+      </div>
+    );
 
   const myBalance = net[meId] ?? 0;
 

@@ -7,9 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated/beitreten")({
   head: () => ({
     meta: [
-      { title: "Kostenstall beitreten | BILLY" },
+      { title: "Kostenstall betreten | BILLY" },
       { name: "description", content: "Tritt dem Kostenstall deiner Freunde bei." },
-      { property: "og:title", content: "Kostenstall beitreten | BILLY" },
+      { property: "og:title", content: "Kostenstall betreten | BILLY" },
       { property: "og:description", content: "Tritt dem Kostenstall deiner Freunde bei." },
     ],
   }),
@@ -33,8 +33,8 @@ function JoinStall() {
       });
       if (error) throw error;
       await queryClient.invalidateQueries({ queryKey: ["stalls"] });
-      toast.success("Willkommen im Stall!");
-      navigate({ to: "/stall/$id", params: { id: data as string } });
+      toast.success("Anfrage ist beim Stallmeister – er lässt dich gleich rein.");
+      void data; navigate({ to: "/dashboard" });
     } catch (error) {
       toast.error(
         error instanceof Error && error.message.includes("nicht gefunden")
@@ -51,7 +51,7 @@ function JoinStall() {
       <Link to="/dashboard" className="text-sm font-bold text-muted-foreground">
         ← Deine Kontoställe
       </Link>
-      <h1 className="mt-2 font-display text-2xl text-foreground">Neuem Kostenstall beitreten</h1>
+      <h1 className="mt-2 font-display text-2xl text-foreground">Kostenstall betreten</h1>
 
       <form className="card-stall mt-5 space-y-4 p-5" onSubmit={handleSubmit}>
         <label className="block">

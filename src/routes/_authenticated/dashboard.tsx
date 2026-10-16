@@ -36,7 +36,7 @@ function Dashboard() {
           to="/beitreten"
           className="flex items-center gap-2 rounded-2xl border-2 border-ink bg-card px-4 py-3 text-sm font-bold text-foreground"
         >
-          <LogIn className="h-4 w-4" /> Neuem Kostenstall beitreten
+          <LogIn className="h-4 w-4" /> Kostenstall betreten
         </Link>
       </div>
 
@@ -72,7 +72,7 @@ function Dashboard() {
             <div>
               <p className="font-display text-lg text-foreground">{stall.name}</p>
               <p className="text-sm text-muted-foreground">
-                {stall.memberCount} {stall.memberCount === 1 ? "Teilnehmer" : "Teilnehmer"}
+                {stall.myStatus === "pending" ? "Wartet auf den Stallmeister" : `${stall.memberCount} Teilnehmer`}
               </p>
             </div>
           </Link>

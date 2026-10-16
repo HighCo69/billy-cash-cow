@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -28,6 +28,7 @@ function StallPage() {
   const { data: me } = useMe();
   const { data, isLoading } = useStall(id);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("konto");
   const [showForm, setShowForm] = useState(false);
   const [newName, setNewName] = useState<string | null>(null);
@@ -520,28 +521,125 @@ function StallPage() {
             </p>
           </form>
 
+          {isOwner && pendingMembers.length > 0 && (
+            <div className="card-stall p-4">
+              <h2 className="font-display text-lg">Vor dem Stall ({pendingMembers.length})</h2>
+              <ul className="mt-3 space-y-3">
+                {pendingMembers.map((member) => (
+                  <li key={member.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <span>
+                      <strong>{member.profile?.full_name ?? "Unbekannt"}</strong>
+                      <br />
+                      <span className="text-muted-foreground">{member.profile?.email}</span>
+                    </span>
+                    <span className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => approveMember(member.id)}
+                        className="rounded-full border-2 border-ink bg-primary px-3 py-1 font-bold text-primary-foreground"
+                      >
+                        Zur Herde
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeMember(member.id, member.profile?.full_name ?? "Diese Person")}
+                        className="rounded-full border-2 border-ink bg-card px-3 py-1 font-bold"
+                      >
+                        Ablehnen
+                      </button>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {isOwner && leavingMembers.length > 0 && (
+            <div className="card-stall p-4">
+              <h2 className="font-display text-lg">Will raus.</h2>
+              <ul className="mt-3 space-y-3">
+                {leavingMembers.map((member) => {
+                  const balance = net[member.user_id] ?? 0;
+                  return (
+                    <li key={member.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                      <span>
+                        <strong>{member.profile?.full_name ?? "Unbekannt"}</strong> · {eur(balance)}
+                        {balance > 0.005 && (
+                          <span className="block text-xs text-muted-foreground">verzichtet auf das Guthaben</span>
+                        )}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeMember(member.id, member.profile?.full_name ?? "Diese Person")}
+                        className="rounded-full border-2 border-ink bg-primary px-3 py-1 font-bold text-primary-foreground"
+                      >
+                        Rauslassen
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+
           <div className="card-stall p-4">
-            <h2 className="font-display text-lg">Im Stall ({members.length}/12)</h2>
+            <h2 className="font-display text-lg">Die Herde ({members.length}/12)</h2>
 
             <ul className="mt-3 space-y-2">
-              {members.map((member: Member) => (
-                <li key={member.id} className="flex items-center justify-between gap-2 text-sm">
-                  <span>
-                    {member.profile?.full_name ?? "Unbekannt"}
-                    {member.user_id === meId ? " (du)" : ""}
-                    {member.role === "owner" ? " · Stallmeister" : ""}
-                  </span>
-                  <span className={(net[member.user_id] ?? 0) >= 0 ? "text-foreground" : "text-destructive"}>
-                    {eur(net[member.user_id] ?? 0)}
-                  </span>
-                </li>
-              ))}
+              {members.map((member: Member) => {
+                const balance = net[member.user_id] ?? 0;
+                const settled = Math.abs(balance) < 0.005;
+                return (
+                  <li key={member.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span>
+                      {member.profile?.full_name ?? "Unbekannt"}
+                      {member.user_id === meId ? " (du)" : ""}
+                      {member.role === "owner" ? " · Stallmeister" : ""}
+                      {member.status === "leaving" ? " · will raus" : ""}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span className={balance >= 0 ? "text-foreground" : "text-destructive"}>
+                        {eur(balance)}
+                      </span>
+                      {isOwner && member.user_id !== meId && settled && (
+                        <button
+                          type="button"
+                          onClick={() => removeMember(member.id, member.profile?.full_name ?? "Diese Person")}
+                          className="rounded-full border-2 border-ink bg-card px-2 py-0.5 text-xs font-bold"
+                        >
+                          Entfernen
+                        </button>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
             <p className="mt-3 text-xs text-muted-foreground">
-              Zum Einladen: deine Freunde tragen unter „Neuem Kostenstall beitreten“ die E-Mail{" "}
-              <strong>{me?.email}</strong> und den Namen <strong>{data.group.name}</strong> ein.
+              Zum Einladen: deine Freunde tragen unter „Kostenstall betreten“ die E-Mail{" "}
+              <strong>{me?.email}</strong> und den Namen <strong>{data.group.name}</strong> ein. Der
+              Stallmeister lässt sie dann rein.
             </p>
+            {!isOwner && myMembership?.status === "active" && (
+              <button
+                type="button"
+                onClick={requestLeave}
+                className="mt-4 w-full rounded-full border-2 border-ink bg-card px-4 py-2 font-bold"
+              >
+                Herde verlassen
+              </button>
+            )}
           </div>
+
+          {isOwner && (
+            <button
+              type="button"
+              onClick={deleteStall}
+              className="w-full rounded-full border-2 border-destructive bg-card px-4 py-2 font-bold text-destructive"
+            >
+              Kostenstall löschen
+            </button>
+          )}
         </section>
       )}
     </div>

@@ -2,7 +2,9 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { LogOut, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import billyLogo from "@/assets/billy-logo-kreis.webp.asset.json";
+// Original-Logo bleibt als Backup erhalten (src/assets/billy-logo-kreis.webp.asset.json).
+// Vorläufig ersetzt durch temporäres Header-Bild:
+import headerLogoTemp from "@/assets/header-logo-temp.jpg";
 
 export function Header() {
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ export function Header() {
       <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-4 py-3">
         <Link to="/dashboard" className="flex min-w-0 items-center gap-2">
           <img
-            src={billyLogo.url}
+            src={headerLogoTemp}
             alt="BILLY"
             className="h-10 w-10 rounded-full border-2 border-ink bg-white object-contain"
           />
